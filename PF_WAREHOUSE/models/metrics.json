@@ -1,0 +1,12 @@
+{
+    "version": "1.0.0",
+    "fecha": "2026-10-24 23:12:45",
+    "metricas": {
+        "rmse": 3867.94
+    },
+    "parametros": {
+        "n_estimators": 50,
+        "test_size": 0.2,
+        "seed": 42
+    }
+}
