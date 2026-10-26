@@ -66,7 +66,7 @@ def ejecutar_entrenamiento():
     import os
     import joblib
     os.makedirs("models", exist_ok=True)
-    joblib.dump(modelo, "models/model.joblib")
+    joblib.dump(model, "models/model.joblib")
     print("¡Modelo entrenado y guardado con éxito!")
 
 if __name__ == "__main__":
