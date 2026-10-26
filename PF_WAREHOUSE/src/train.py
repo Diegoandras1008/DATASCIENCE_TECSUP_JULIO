@@ -62,9 +62,12 @@ if __name__ == "__main__":
 def ejecutar_entrenamiento():
     print("3. Entrenando el modelo de Machine Learning...")
     
-    # LLAMA A TU FUNCIÓN REAL DE DATOS (reemplázala por la que tengas en data.py o arriba en tu script)
-    # Por ejemplo, si tienes una función para cargar y dividir los datos:
-    X_train, X_test, y_train, y_test = cargar_datos_y_preparar() 
+    # PEGA AQUÍ TUS LÍNEAS REALES DE CARGA Y SPLIT DE DATOS:
+    # (Por ejemplo, lo que tengas en data.py o arriba en tu script)
+    df = pd.read_csv("ruta_a_tu_dataset.csv")  # o la ruta que uses
+    X = df.drop(columns=['columna_objetivo'])
+    y = df['columna_objetivo']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=SEED)
 
     model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
     model.fit(X_train, y_train)
