@@ -60,20 +60,15 @@ if __name__ == "__main__":
     entrenar_modelo()
 
 def ejecutar_entrenamiento():
-    # Tu código actual de lectura de datos, preprocesamiento y entrenamiento
-    # ...
-    # Y al final, el guardado del modelo:
-    import os
-    import joblib
-    os.makedirs("models", exist_ok=True)
-    joblib.dump(model, "models/model.joblib")
-    print("¡Modelo entrenado y guardado con éxito!")
-
-if __name__ == "__main__":
-    ejecutar_entrenamiento()
-
-def ejecutar_entrenamiento():
     print("3. Entrenando el modelo de Machine Learning...")
+    
+    # 1. Asegúrate de llamar a tu función que carga y prepara los datos 
+    # (reemplaza 'cargar_datos_y_preparar()' por el nombre real de tu función o código que define X_train, y_train)
+    # X_train, X_test, y_train, y_test = cargar_datos_y_preparar() 
+    
+    # O si ya tienes X_train e y_train definidos arriba en tu script, 
+    # asegúrate de que esta función los invoque o los procese antes de hacer el fit:
+    
     model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
     model.fit(X_train, y_train)
     
@@ -82,3 +77,6 @@ def ejecutar_entrenamiento():
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/model.joblib")
     print("¡Modelo entrenado y guardado con éxito!")
+
+if __name__ == "__main__":
+    ejecutar_entrenamiento()
