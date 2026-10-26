@@ -71,3 +71,14 @@ def ejecutar_entrenamiento():
 
 if __name__ == "__main__":
     ejecutar_entrenamiento()
+
+def ejecutar_entrenamiento():
+    print("3. Entrenando el modelo de Machine Learning...")
+    model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
+    model.fit(X_train, y_train)
+    
+    import os
+    import joblib
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(model, "models/model.joblib")
+    print("¡Modelo entrenado y guardado con éxito!")
