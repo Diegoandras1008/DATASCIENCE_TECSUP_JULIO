@@ -58,3 +58,16 @@ def entrenar_modelo():
 
 if __name__ == "__main__":
     entrenar_modelo()
+
+def ejecutar_entrenamiento():
+    # Tu código actual de lectura de datos, preprocesamiento y entrenamiento
+    # ...
+    # Y al final, el guardado del modelo:
+    import os
+    import joblib
+    os.makedirs("models", exist_ok=True)
+    joblib.dump(modelo, "models/model.joblib")
+    print("¡Modelo entrenado y guardado con éxito!")
+
+if __name__ == "__main__":
+    ejecutar_entrenamiento()

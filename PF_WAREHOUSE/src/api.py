@@ -81,3 +81,36 @@ def predict(item: ItemDemanda):
         raise HTTPException(
             status_code=500, detail=f"Error durante la inferencia: {str(e)}"
         )
+
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+import os
+import joblib
+from src.train import ejecutar_entrenamiento  # Importa tu función de entrenamiento
+
+# Definimos el evento de inicio de la aplicación
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    model_path = "models/model.joblib"
+    
+    # Si el modelo no existe (porque Git lo ignoró), lo entrenamos al arrancar
+    if not os.path.exists(model_path):
+        print(">>> Modelo no encontrado. Entrenando automáticamente en el servidor...")
+        ejecutar_entrenamiento()
+    else:
+        print(">>> Modelo cargado correctamente desde el disco.")
+        
+    yield
+    # Código de limpieza al apagar (si se requiere)
+
+app = FastAPI(
+    title="API Predicción de Demanda - Walmart MLOps",
+    version="1.0",
+    lifespan=lifespan
+)
+
+# Cargar el modelo en memoria para las predicciones
+MODEL_PATH = "models/model.joblib"
+model = joblib.load(MODEL_PATH)
+
+# ... (tus rutas de FastAPI y endpoints de predicción continúan aquí)
