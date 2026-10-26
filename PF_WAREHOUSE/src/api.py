@@ -111,6 +111,6 @@ app = FastAPI(
 
 # Cargar el modelo en memoria para las predicciones
 MODEL_PATH = "models/model.joblib"
-model = joblib.load(MODEL_PATH)
+model = None
 
 # ... (tus rutas de FastAPI y endpoints de predicción continúan aquí)
