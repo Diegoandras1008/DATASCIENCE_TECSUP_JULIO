@@ -62,13 +62,10 @@ if __name__ == "__main__":
 def ejecutar_entrenamiento():
     print("3. Entrenando el modelo de Machine Learning...")
     
-    # 1. Asegúrate de llamar a tu función que carga y prepara los datos 
-    # (reemplaza 'cargar_datos_y_preparar()' por el nombre real de tu función o código que define X_train, y_train)
-    # X_train, X_test, y_train, y_test = cargar_datos_y_preparar() 
-    
-    # O si ya tienes X_train e y_train definidos arriba en tu script, 
-    # asegúrate de que esta función los invoque o los procese antes de hacer el fit:
-    
+    # LLAMA A TU FUNCIÓN REAL DE DATOS (reemplázala por la que tengas en data.py o arriba en tu script)
+    # Por ejemplo, si tienes una función para cargar y dividir los datos:
+    X_train, X_test, y_train, y_test = cargar_datos_y_preparar() 
+
     model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
     model.fit(X_train, y_train)
     
