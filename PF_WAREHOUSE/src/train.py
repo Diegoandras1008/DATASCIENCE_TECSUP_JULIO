@@ -60,36 +60,37 @@ if __name__ == "__main__":
     entrenar_modelo()
 
 def ejecutar_entrenamiento():
-    print("3. Entrenando el modelo de Machine Learning...")
+    print("3. Entrenando el modelo de Machine Learning con optimización de memoria...")
     
-    # 1. Cargar el dataset
-    df = pd.read_csv("data/train.csv")
+    # 1. Cargar solo las columnas necesarias o usar tipos eficientes
+    df = pd.read_csv("data/train.csv", nrows=50000) # Opcional: limitar filas si es muy pesado, o usar todo el df si optimizamos tipos
     
-    # 2. Manejar la columna de fecha (convertirla a numéricas o eliminarla si no se usa directamente)
-    # Opción A: Extraer características de la fecha (Año, Mes, Día)
+    # 2. Procesar fecha de forma ligera
     if 'Date' in df.columns:
         df['Date'] = pd.to_datetime(df['Date'])
-        df['Year'] = df['Date'].dt.year
-        df['Month'] = df['Date'].dt.month
-        df['Day'] = df['Date'].dt.day
-        df = df.drop(columns=['Date']) # Eliminamos la fecha original en texto
+        df['Year'] = df['Date'].dt.year.astype('int16')
+        df['Month'] = df['Date'].dt.month.astype('int8')
+        df['Day'] = df['Date'].dt.day.astype('int8')
+        df = df.drop(columns=['Date'])
         
-    # Opción B: Si hay columnas categóricas como IsHoliday (True/False), convertirlas a numéricas (0 y 1)
     if 'IsHoliday' in df.columns:
-        df['IsHoliday'] = df['IsHoliday'].astype(int)
+        df['IsHoliday'] = df['IsHoliday'].astype('int8')
 
-    # 3. Separar características (X) y la variable objetivo (y)
+    # Optimizar numéricas para gastar menos RAM
+    for col in ['Store', 'Dept']:
+        if col in df.columns:
+            df[col] = df[col].astype('int16')
+
     X = df.drop(columns=['Weekly_Sales']) 
     y = df['Weekly_Sales']
     
-    # 4. Dividir datos en entrenamiento y prueba
+    # 3. Split con un tamaño menor o prueba
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 5. Entrenar el modelo
-    model = RandomForestRegressor(n_estimators=50, random_state=42, n_jobs=-1)
+    # 4. Reducir un poco n_estimators y usar max_depth para que no sature la RAM al entrenar
+    model = RandomForestRegressor(n_estimators=20, max_depth=15, random_state=42, n_jobs=-1)
     model.fit(X_train, y_train)
     
-    # 6. Guardar el modelo entrenado
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/model.joblib")
     print("¡Modelo entrenado y guardado con éxito!")
