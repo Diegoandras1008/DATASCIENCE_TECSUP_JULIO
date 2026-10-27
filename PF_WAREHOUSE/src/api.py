@@ -114,3 +114,39 @@ MODEL_PATH = "models/model.joblib"
 model = None
 
 # ... (tus rutas de FastAPI y endpoints de predicción continúan aquí)
+from fastapi import FastAPI
+import joblib
+import pandas as pd
+
+app = FastAPI(
+    title="API Predicción de Demanda - Walmart MLOps",
+    version="1.0"
+)
+
+# Cargar el modelo entrenado (puedes usar tu ciclo de vida 'lifespan' o cargarlo aquí)
+model = joblib.load("models/model.joblib")
+
+@app.get("/")
+def read_root():
+    return {"mensaje": "¡La API de predicción de demanda está activa y funcionando! 🚀"}
+
+@app.post("/predict")
+def predict_demand(store: int, dept: int, is_holiday: int, year: int, month: int, day: int):
+    # Preparar los datos de entrada en el mismo orden que el entrenamiento
+    input_data = pd.DataFrame([{
+        'Store': store,
+        'Dept': dept,
+        'IsHoliday': is_holiday,
+        'Year': year,
+        'Month': month,
+        'Day': day
+    }])
+    
+    # Realizar la predicción con el modelo
+    prediction = model.predict(input_data)
+    
+    return {
+        "Store": store,
+        "Dept": dept,
+        "Predicted_Weekly_Sales": float(prediction[0])
+    }
