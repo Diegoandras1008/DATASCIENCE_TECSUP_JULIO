@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 import joblib
 import numpy as np
@@ -62,10 +63,10 @@ if __name__ == "__main__":
 def ejecutar_entrenamiento():
     print("3. Entrenando el modelo de Machine Learning con optimización de memoria...")
     
-    # 1. Cargar solo las columnas necesarias o usar tipos eficientes
-    df = pd.read_csv("data/train.csv", nrows=50000) # Opcional: limitar filas si es muy pesado, o usar todo el df si optimizamos tipos
+    # 1. Cargar el dataset
+    df = pd.read_csv("data/train.csv")
     
-    # 2. Procesar fecha de forma ligera
+    # 2. Procesar fecha de forma ligera y eficiente en RAM
     if 'Date' in df.columns:
         df['Date'] = pd.to_datetime(df['Date'])
         df['Year'] = df['Date'].dt.year.astype('int16')
@@ -73,24 +74,27 @@ def ejecutar_entrenamiento():
         df['Day'] = df['Date'].dt.day.astype('int8')
         df = df.drop(columns=['Date'])
         
+    # Convertir IsHoliday a numérico ligero
     if 'IsHoliday' in df.columns:
         df['IsHoliday'] = df['IsHoliday'].astype('int8')
 
-    # Optimizar numéricas para gastar menos RAM
+    # Reducir el peso en memoria de las columnas numéricas principales
     for col in ['Store', 'Dept']:
         if col in df.columns:
             df[col] = df[col].astype('int16')
 
+    # 3. Separar características (X) y variable objetivo (y)
     X = df.drop(columns=['Weekly_Sales']) 
     y = df['Weekly_Sales']
     
-    # 3. Split con un tamaño menor o prueba
+    # 4. Dividir los datos
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # 4. Reducir un poco n_estimators y usar max_depth para que no sature la RAM al entrenar
+    # 5. Entrenar el modelo con parámetros ligeros
     model = RandomForestRegressor(n_estimators=20, max_depth=15, random_state=42, n_jobs=-1)
     model.fit(X_train, y_train)
     
+    # 6. Guardar el modelo entrenado
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/model.joblib")
     print("¡Modelo entrenado y guardado con éxito!")
