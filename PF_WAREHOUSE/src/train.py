@@ -65,8 +65,8 @@ def ejecutar_entrenamiento():
     # PEGA AQUÍ TUS LÍNEAS REALES DE CARGA Y SPLIT DE DATOS:
     # (Por ejemplo, lo que tengas en data.py o arriba en tu script)
     df = pd.read_csv("data/train.csv")  # o la ruta que uses
-    X = df.drop(columns=['columna_objetivo'])
-    y = df['columna_objetivo']
+    X = df.drop(columns=['Weekly_Sales'])
+    y = df['Weekly_Sales']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=SEED)
 
     model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
