@@ -64,7 +64,7 @@ def ejecutar_entrenamiento():
     
     # PEGA AQUÍ TUS LÍNEAS REALES DE CARGA Y SPLIT DE DATOS:
     # (Por ejemplo, lo que tengas en data.py o arriba en tu script)
-    df = pd.read_csv("ruta_a_tu_dataset.csv")  # o la ruta que uses
+    df = pd.read_csv("data/train.csv")  # o la ruta que uses
     X = df.drop(columns=['columna_objetivo'])
     y = df['columna_objetivo']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=SEED)
