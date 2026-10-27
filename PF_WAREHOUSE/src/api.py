@@ -84,24 +84,27 @@ def predict(item: ItemDemanda):
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-import os
 import joblib
-from src.train import ejecutar_entrenamiento  # Importa tu función de entrenamiento
+import pandas as pd
+import os
+from src.train import ejecutar_entrenamiento
 
-# Definimos el evento de inicio de la aplicación
+# Variable global para el modelo
+model = None
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    model_path = "models/model.joblib"
-    
-    # Si el modelo no existe (porque Git lo ignoró), lo entrenamos al arrancar
-    if not os.path.exists(model_path):
+    global model
+    # 1. Si el modelo no existe, lo entrenamos automáticamente al arrancar
+    if not os.path.exists("models/model.joblib"):
         print(">>> Modelo no encontrado. Entrenando automáticamente en el servidor...")
         ejecutar_entrenamiento()
-    else:
-        print(">>> Modelo cargado correctamente desde el disco.")
-        
+    
+    # 2. Cargamos el modelo en memoria para que la API lo use
+    print(">>> Cargando el modelo entrenado...")
+    model = joblib.load("models/model.joblib")
     yield
-    # Código de limpieza al apagar (si se requiere)
+    # Limpieza al apagar (si es necesaria)
 
 app = FastAPI(
     title="API Predicción de Demanda - Walmart MLOps",
@@ -109,30 +112,13 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Cargar el modelo en memoria para las predicciones
-MODEL_PATH = "models/model.joblib"
-model = None
-
-# ... (tus rutas de FastAPI y endpoints de predicción continúan aquí)
-from fastapi import FastAPI
-import joblib
-import pandas as pd
-
-app = FastAPI(
-    title="API Predicción de Demanda - Walmart MLOps",
-    version="1.0"
-)
-
-# Cargar el modelo entrenado (puedes usar tu ciclo de vida 'lifespan' o cargarlo aquí)
-model = joblib.load("models/model.joblib")
-
 @app.get("/")
 def read_root():
     return {"mensaje": "¡La API de predicción de demanda está activa y funcionando! 🚀"}
 
 @app.post("/predict")
 def predict_demand(store: int, dept: int, is_holiday: int, year: int, month: int, day: int):
-    # Preparar los datos de entrada en el mismo orden que el entrenamiento
+    # Preparar los datos de entrada
     input_data = pd.DataFrame([{
         'Store': store,
         'Dept': dept,
@@ -142,7 +128,7 @@ def predict_demand(store: int, dept: int, is_holiday: int, year: int, month: int
         'Day': day
     }])
     
-    # Realizar la predicción con el modelo
+    # Realizar la predicción
     prediction = model.predict(input_data)
     
     return {
