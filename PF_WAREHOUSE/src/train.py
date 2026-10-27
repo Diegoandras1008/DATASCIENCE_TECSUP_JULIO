@@ -62,18 +62,34 @@ if __name__ == "__main__":
 def ejecutar_entrenamiento():
     print("3. Entrenando el modelo de Machine Learning...")
     
-    # PEGA AQUÍ TUS LÍNEAS REALES DE CARGA Y SPLIT DE DATOS:
-    # (Por ejemplo, lo que tengas en data.py o arriba en tu script)
-    df = pd.read_csv("data/train.csv")  # o la ruta que uses
-    X = df.drop(columns=['Weekly_Sales'])
-    y = df['Weekly_Sales']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SIZE, random_state=SEED)
+    # 1. Cargar el dataset
+    df = pd.read_csv("data/train.csv")
+    
+    # 2. Manejar la columna de fecha (convertirla a numéricas o eliminarla si no se usa directamente)
+    # Opción A: Extraer características de la fecha (Año, Mes, Día)
+    if 'Date' in df.columns:
+        df['Date'] = pd.to_datetime(df['Date'])
+        df['Year'] = df['Date'].dt.year
+        df['Month'] = df['Date'].dt.month
+        df['Day'] = df['Date'].dt.day
+        df = df.drop(columns=['Date']) # Eliminamos la fecha original en texto
+        
+    # Opción B: Si hay columnas categóricas como IsHoliday (True/False), convertirlas a numéricas (0 y 1)
+    if 'IsHoliday' in df.columns:
+        df['IsHoliday'] = df['IsHoliday'].astype(int)
 
-    model = RandomForestRegressor(n_estimators=50, random_state=SEED, n_jobs=-1)
+    # 3. Separar características (X) y la variable objetivo (y)
+    X = df.drop(columns=['Weekly_Sales']) 
+    y = df['Weekly_Sales']
+    
+    # 4. Dividir datos en entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # 5. Entrenar el modelo
+    model = RandomForestRegressor(n_estimators=50, random_state=42, n_jobs=-1)
     model.fit(X_train, y_train)
     
-    import os
-    import joblib
+    # 6. Guardar el modelo entrenado
     os.makedirs("models", exist_ok=True)
     joblib.dump(model, "models/model.joblib")
     print("¡Modelo entrenado y guardado con éxito!")
