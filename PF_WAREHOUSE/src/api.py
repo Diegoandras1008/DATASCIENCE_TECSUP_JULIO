@@ -83,11 +83,10 @@ def predict(item: ItemDemanda):
         )
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 import joblib
 import pandas as pd
 import os
-from pydantic import BaseModel, Field
 from src.train import ejecutar_entrenamiento
 
 # Variable global para el modelo
@@ -96,12 +95,12 @@ model = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global model
-    # 1. Si el modelo no existe, lo entrenamos automáticamente
+    # 1. Si el modelo no existe, lo entrenamos automáticamente al arrancar
     if not os.path.exists("models/model.joblib"):
         print(">>> Modelo no encontrado. Entrenando automáticamente en el servidor...")
         ejecutar_entrenamiento()
     
-    # 2. Cargamos el modelo en memoria
+    # 2. Cargamos el modelo en memoria para la API
     print(">>> Cargando el modelo entrenado...")
     model = joblib.load("models/model.joblib")
     yield
@@ -112,42 +111,34 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Definir el esquema de entrada limpio con Pydantic
-class PredictionInput(BaseModel):
-    store: int = Field(..., example=10, description="Número de tienda (Store)")
-    dept: int = Field(..., example=2, description="Número de departamento (Dept)")
-    is_holiday: int = Field(..., example=0, description="Es día festivo (0 = No, 1 = Sí)")
-    year: int = Field(..., example=2012, description="Año (ej. 2012)")
-    month: int = Field(..., example=9, description="Mes (1-12)")
-    day: int = Field(..., example=31, description="Día del mes (1-31)")
-
-# Definir el esquema de salida
-class PredictionOutput(BaseModel):
-    Store: int
-    Dept: int
-    Predicted_Weekly_Sales: float
-
 @app.get("/")
 def read_root():
     return {"mensaje": "¡La API de predicción de demanda está activa y funcionando! 🚀"}
 
-@app.post("/predict", response_model=PredictionOutput, summary="Predecir ventas semanales")
-def predict_demand(data: PredictionInput):
-    # Convertir los datos de entrada a DataFrame respetando el orden
+@app.post("/predict", summary="Predecir ventas semanales")
+def predict_demand(
+    store: int = Query(..., description="Número de tienda (Store)", example=10),
+    dept: int = Query(..., description="Número de departamento (Dept)", example=2),
+    is_holiday: int = Query(..., description="Es día festivo (0 = No, 1 = Sí)", example=0),
+    year: int = Query(..., description="Año dentro del rango histórico (ej. 2012)", example=2012),
+    month: int = Query(..., description="Mes (1-12)", example=9),
+    day: int = Query(..., description="Día del mes (1-31)", example=21)
+):
+    # Preparar los datos de entrada en un DataFrame respetando el orden del entrenamiento
     input_df = pd.DataFrame([{
-        'Store': data.store,
-        'Dept': data.dept,
-        'IsHoliday': data.is_holiday,
-        'Year': data.year,
-        'Month': data.month,
-        'Day': data.day
+        'Store': store,
+        'Dept': dept,
+        'IsHoliday': is_holiday,
+        'Year': year,
+        'Month': month,
+        'Day': day
     }])
     
     # Realizar la predicción
     prediction = model.predict(input_df)
     
     return {
-        "Store": data.store,
-        "Dept": data.dept,
+        "Store": store,
+        "Dept": dept,
         "Predicted_Weekly_Sales": float(prediction[0])
     }
