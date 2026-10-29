@@ -124,7 +124,6 @@ def predict_demand(
     month: int = Query(..., description="Mes (1-12)", example=9),
     day: int = Query(..., description="Día del mes (1-31)", example=21)
 ):
-    # Preparar los datos de entrada en un DataFrame respetando el orden del entrenamiento
     input_df = pd.DataFrame([{
         'Store': store,
         'Dept': dept,
@@ -134,11 +133,13 @@ def predict_demand(
         'Day': day
     }])
     
-    # Realizar la predicción
     prediction = model.predict(input_df)
+    
+    # Redondear a 2 decimales para una presentación limpia
+    predicted_sales = round(float(prediction[0]), 2)
     
     return {
         "Store": store,
         "Dept": dept,
-        "Predicted_Weekly_Sales": float(prediction[0])
+        "Predicted_Weekly_Sales": predicted_sales
     }
