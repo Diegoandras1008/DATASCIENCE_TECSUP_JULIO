@@ -85,3 +85,11 @@ Ejecutar la API localmente:
 
 Bash
 uvicorn src.api:app --reload
+
+## 🎨 Interfaz Gráfica Local (Gradio)
+Además de la API en Render, el proyecto incluye una interfaz web interactiva desarrollada con **Gradio** para realizar pruebas visuales locales de manera intuitiva mediante controles deslizantes y selectores.
+
+* **Ejecutar la interfaz de Gradio localmente:**
+  ```bash
+  python src/app_gradio.py
+Esto abrirá una aplicación web interactiva en tu navegador (por defecto en http://127.0.0.1:7860).
